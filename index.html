@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#025868">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Precisión">
+<title>Precisión · Registro de Clientes</title>
+<style>
+:root{
+  --teal:#025868; --teal-2:#03758a; --teal-soft:#e6f0f2;
+  --orange:#FF8A00; --orange-soft:#fff2e0;
+  --ink:#3C4445; --muted:#6f7a7c; --line:#d9e2e4; --bg:#f4f7f7; --card:#ffffff;
+  --ok:#2e8b57; --err:#c0392b;
+  --f-title:'Aquawax','Avenir Next','Avenir','Montserrat','Segoe UI',system-ui,sans-serif;
+  --f-text:'Avenir','Avenir Next','Nunito Sans','Segoe UI',Roboto,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-text);font-size:16px;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+header{background:#fff;border-bottom:4px solid var(--teal);position:sticky;top:0;z-index:20}
+.top{max-width:760px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.top img{height:44px;width:auto}
+.top .sp{flex:1}
+.net{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.net.on{background:#e3f4ea;color:var(--ok)} .net.off{background:#f1f1f1;color:var(--muted)}
+nav{max-width:760px;margin:0 auto;display:flex;padding:0 8px}
+nav button{flex:1;border:0;background:none;padding:12px 4px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;font-size:15px}
+nav button.act{color:var(--teal);border-bottom-color:var(--orange)}
+.badge{display:inline-block;min-width:20px;padding:1px 6px;border-radius:99px;background:var(--orange);color:#fff;font-size:12px;margin-left:4px}
+main{max-width:760px;margin:0 auto;padding:16px 16px 110px}
+h1,h2,h3{font-family:var(--f-title);color:var(--teal);letter-spacing:.02em;margin:0}
+h1{font-size:22px;text-transform:uppercase}
+.sub{color:var(--muted);margin:4px 0 16px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--orange)}
+label{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:12px 0 6px}
+label:first-of-type{margin-top:0}
+label .opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:16px;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-soft)}
+input.bad{border-color:var(--err)}
+.hint{font-size:12px;color:var(--err);margin-top:4px;min-height:0}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.row .u{flex:0 0 130px}
+.ac{position:relative}
+.ac-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1.5px solid var(--teal);border-radius:10px;max-height:280px;overflow:auto;z-index:30;box-shadow:0 10px 24px rgba(2,88,104,.15);display:none}
+.ac-list div{padding:11px 14px;cursor:pointer;border-bottom:1px solid #eef2f3}
+.ac-list div:last-child{border:0}
+.ac-list div b{color:var(--teal)}
+.ac-list div small{display:block;color:var(--muted);font-size:12px}
+.ac-list div.hi,.ac-list div:hover{background:var(--orange-soft)}
+.ac-list .none{color:var(--muted);cursor:default}
+.sel{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--teal-soft);font-size:14px}
+.sel b{color:var(--teal)}
+.mapwrap{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f7fafa;position:relative}
+.maptabs{display:flex;gap:6px;padding:8px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
+.chip.act{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+#svgmap{display:block;width:100%;height:auto;max-height:440px;touch-action:manipulation}
+#tilemap{position:relative;height:340px;overflow:hidden;display:none;background:#dfe7e8;cursor:crosshair;touch-action:none}
+#tilemap img{position:absolute;width:256px;height:256px;user-select:none;-webkit-user-drag:none}
+.pin{position:absolute;width:26px;height:26px;margin:-26px 0 0 -13px;pointer-events:none;z-index:5}
+.zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px;z-index:6}
+.zoom button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:20px;font-weight:700;cursor:pointer}
+.attr{position:absolute;left:0;bottom:0;background:rgba(255,255,255,.8);font-size:10px;padding:2px 6px;z-index:6}
+.mapnote{font-size:12px;color:var(--muted);padding:8px 10px;background:#fff;border-top:1px solid var(--line)}
+.coords{font-variant-numeric:tabular-nums;font-weight:700;color:var(--teal)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:13px 18px;font-weight:800;cursor:pointer;font-size:15px;letter-spacing:.02em}
+.btn.pri{background:var(--orange);color:#fff}
+.btn.sec{background:var(--teal);color:#fff}
+.btn.ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+.btn.danger{background:#fff;color:var(--err);border:1.5px solid #e8c3be}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:9px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:25}
+.savebar .in{max-width:728px;margin:0 auto;display:flex;gap:10px}
+.savebar .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.stats{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font-family:var(--f-text);font-weight:800;font-size:28px;font-variant-numeric:tabular-nums;color:var(--teal)}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.stat.p b{color:var(--orange)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.rec{background:#fff;border:1px solid var(--line);border-left:5px solid var(--orange);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.rec.sync{border-left-color:var(--teal)}
+.rec .h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.rec .n{font-weight:800;font-size:16px}
+.rec .m{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5}
+.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.tag.p{background:var(--orange-soft);color:#b35f00}.tag.s{background:var(--teal-soft);color:var(--teal)}
+.rec .a{display:flex;gap:6px;margin-top:10px}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+pre{background:#0f2a2f;color:#d7f1f4;padding:12px;border-radius:10px;overflow:auto;font-size:12px;max-height:260px;white-space:pre}
+ol{padding-left:20px;line-height:1.6;font-size:14px}
+.ok{color:var(--ok);font-weight:700}.er{color:var(--err);font-weight:700}
+.hide{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
+@media (max-width:480px){.row{flex-direction:column}.row .u{flex:auto}.top img{height:36px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <img src="data:image/png;base64,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" alt="Precisión - mide el campo">
+    <div class="sp"></div>
+    <span id="net" class="net off">Sin conexión</span>
+  </div>
+  <nav>
+    <button data-tab="form" class="act">Nuevo registro</button>
+    <button data-tab="list">Registros <span id="cnt" class="badge">0</span></button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ FORMULARIO ============ -->
+<section id="tab-form">
+  <h1 id="ftitle">Registro de cliente potencial</h1>
+  <p class="sub">Funciona sin internet. Los datos quedan guardados en este dispositivo y se envían automáticamente cuando haya señal.</p>
+
+  <form id="f" autocomplete="off" novalidate>
+    <div class="card">
+      <h2>Datos de contacto</h2>
+      <label for="nombre">Nombre completo</label>
+      <input id="nombre" name="nombre" autocomplete="name" placeholder="Ej. Juan Carlos Restrepo">
+      <div class="hint" data-for="nombre"></div>
+
+      <label for="celular">Número de celular</label>
+      <input id="celular" name="celular" type="tel" inputmode="numeric" placeholder="Ej. 300 123 4567" maxlength="14">
+      <div class="hint" data-for="celular"></div>
+
+      <label for="email">E-mail <span class="opt">(opcional)</span></label>
+      <input id="email" name="email" type="email" inputmode="email" placeholder="correo@ejemplo.com">
+      <div class="hint" data-for="email"></div>
+    </div>
+
+    <div class="card">
+      <h2>Predio</h2>
+      <label for="predio">Nombre del predio / finca</label>
+      <input id="predio" name="predio" placeholder="Ej. Finca La Esperanza">
+      <div class="hint" data-for="predio"></div>
+
+      <label for="area">Área aproximada</label>
+      <div class="row">
+        <input id="area" name="area" type="number" inputmode="decimal" min="0" step="any" placeholder="Ej. 25">
+        <select id="unidad" name="unidad" class="u">
+          <option value="ha">Hectáreas</option>
+          <option value="cuadras">Cuadras</option>
+          <option value="fanegadas">Fanegadas</option>
+          <option value="m²">m²</option>
+        </select>
+      </div>
+      <div class="hint" data-for="area"></div>
+    </div>
+
+    <div class="card">
+      <h2>Ubicación</h2>
+      <label for="muni">Municipio</label>
+      <div class="ac">
+        <input id="muni" placeholder="Escriba el municipio… ej. San Pedro" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="aclist">
+        <div id="aclist" class="ac-list" role="listbox"></div>
+      </div>
+      <div class="hint" data-for="muni"></div>
+      <div id="sel" class="sel"></div>
+
+      <label for="vereda">Vereda / referencia <span class="opt">(opcional)</span></label>
+      <input id="vereda" name="vereda" placeholder="Ej. Vereda El Tambo, vía a Belmira km 4">
+
+      <div class="mapwrap">
+        <div class="maptabs">
+          <button type="button" class="chip act" data-map="svg">Mapa Colombia</button>
+          <button type="button" class="chip" data-map="tile" id="btnSat">Satélite (con internet)</button>
+          <button type="button" class="chip" id="btnGps">📍 Mi ubicación GPS</button>
+        </div>
+        <svg id="svgmap" viewBox="0 0 600 800" aria-label="Mapa de Colombia"></svg>
+        <div id="tilemap">
+          <div class="zoom"><button type="button" id="zin">+</button><button type="button" id="zout">−</button></div>
+          <svg class="pin" id="tpin" viewBox="0 0 24 24"><path d="M12 2C7.6 2 4 5.6 4 10c0 5.4 7 11.6 7.3 11.9.4.3 1 .3 1.4 0C13 21.6 20 15.4 20 10c0-4.4-3.6-8-8-8z" fill="#FF8A00" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>
+          <div class="attr" id="tattr">Imágenes © Esri</div>
+        </div>
+        <div class="mapnote" id="mapnote">Seleccione un municipio, use el GPS del celular, o toque un punto del mapa.</div>
+      </div>
+      <label for="obs" style="margin-top:14px">Observaciones <span class="opt">(opcional)</span></label>
+      <textarea id="obs" name="obs" rows="2" placeholder="Interés: pastoreo rotacional, fumigación con dron, topografía…"></textarea>
+    </div>
+  </form>
+</section>
+
+<!-- ============ REGISTROS ============ -->
+<section id="tab-list" class="hide">
+  <h1>Registros guardados</h1>
+  <p class="sub">Guardados en este dispositivo. Los pendientes se envían cuando haya señal.</p>
+  <div class="stats">
+    <div class="stat"><b id="sTot">0</b><span>Total</span></div>
+    <div class="stat p"><b id="sPen">0</b><span>Pendientes</span></div>
+    <div class="stat"><b id="sSyn">0</b><span>Enviados</span></div>
+  </div>
+  <div class="tools">
+    <button class="btn sec sm" id="btnSync">⇪ Enviar registros</button>
+    <button class="btn ghost sm" id="btnXls">Descargar Excel</button>
+    <button class="btn ghost sm" id="btnJson">Copia de seguridad</button>
+    <label class="btn ghost sm" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px">Restaurar<input type="file" id="fileIn" accept=".json" hidden></label>
+  </div>
+  <input id="q" placeholder="Buscar por nombre, finca o municipio…" style="margin-bottom:12px">
+  <div id="recs"></div>
+</section>
+
+<!-- ============ CONFIGURACIÓN OCULTA (5 toques en el logo) ============ -->
+<section id="tab-cfg" class="hide">
+  <h1>Configuración</h1>
+  <p class="sub">Dirección de envío de los registros. Se guarda en este dispositivo.</p>
+  <div class="card">
+    <input id="url" type="password" placeholder="Pegue aquí la dirección" autocomplete="off">
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn sec sm" id="btnSaveUrl">Guardar</button>
+      <button class="btn ghost sm" id="btnTest">Probar</button>
+      <button class="btn ghost sm" id="btnClose">Cerrar</button>
+    </div>
+    <div id="testOut" style="margin-top:8px;font-size:14px"></div>
+  </div>
+</section>
+</main>
+
+<div class="savebar" id="savebar"><div class="in">
+  <button class="btn ghost hide" id="btnCancel" type="button">Cancelar</button>
+  <button class="btn pri" id="btnSave" type="button">Guardar registro</button>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== DATOS ===================== */
+const RAW = `Antioquia|Medellín,6.25,-75.57;Abejorral,5.79,-75.43;Abriaquí,6.63,-76.07;Alejandría,6.38,-75.14;Amagá,6.04,-75.70;Amalfi,6.91,-75.08;Andes,5.66,-75.88;Angelópolis,6.11,-75.71;Angostura,6.89,-75.33;Anorí,7.07,-75.15;Santa Fe de Antioquia,6.56,-75.83;Anzá,6.30,-75.85;Apartadó,7.88,-76.63;Arboletes,8.85,-76.43;Argelia,5.73,-75.14;Armenia,6.16,-75.79;Barbosa,6.44,-75.33;Belmira,6.61,-75.67;Bello,6.34,-75.56;Betania,5.75,-75.98;Betulia,6.11,-75.98;Ciudad Bolívar,5.85,-76.02;Briceño,7.11,-75.55;Buriticá,6.72,-75.91;Cáceres,7.58,-75.35;Caicedo,6.41,-75.98;Caldas,6.09,-75.64;Campamento,7.00,-75.30;Cañasgordas,6.75,-76.03;Caracolí,6.41,-74.76;Caramanta,5.55,-75.64;Carepa,7.76,-76.65;El Carmen de Viboral,6.08,-75.34;Carolina del Príncipe,6.73,-75.28;Caucasia,7.98,-75.20;Chigorodó,7.67,-76.68;Cisneros,6.54,-75.09;Cocorná,6.06,-75.19;Concepción,6.39,-75.26;Concordia,6.05,-75.91;Copacabana,6.35,-75.51;Dabeiba,7.00,-76.26;Donmatías,6.49,-75.39;Ebéjico,6.33,-75.77;El Bagre,7.60,-74.81;Entrerríos,6.57,-75.52;Envigado,6.17,-75.59;Fredonia,5.93,-75.67;Frontino,6.78,-76.13;Giraldo,6.68,-75.95;Girardota,6.38,-75.45;Gómez Plata,6.68,-75.22;Granada,6.14,-75.19;Guadalupe,6.82,-75.24;Guarne,6.28,-75.44;Guatapé,6.23,-75.16;Heliconia,6.21,-75.73;Hispania,5.80,-75.91;Itagüí,6.17,-75.61;Ituango,7.17,-75.76;Jardín,5.60,-75.82;Jericó,5.79,-75.79;La Ceja,6.03,-75.43;La Estrella,6.16,-75.64;La Pintada,5.74,-75.61;La Unión,5.97,-75.36;Liborina,6.68,-75.81;Maceo,6.55,-74.79;Marinilla,6.17,-75.34;Montebello,5.95,-75.52;Murindó,6.98,-76.82;Mutatá,7.24,-76.44;Nariño,5.61,-75.18;Necoclí,8.43,-76.78;Nechí,8.09,-74.78;Olaya,6.63,-75.81;El Peñol,6.22,-75.24;Peque,7.02,-75.91;Pueblorrico,5.79,-75.84;Puerto Berrío,6.49,-74.40;Puerto Nare,6.19,-74.59;Puerto Triunfo,5.87,-74.64;Remedios,7.03,-74.69;El Retiro,6.06,-75.50;Rionegro,6.15,-75.37;Sabanalarga,6.85,-75.82;Sabaneta,6.15,-75.62;Salgar,5.96,-75.98;San Andrés de Cuerquia,6.92,-75.67;San Carlos,6.19,-74.99;San Francisco,5.96,-75.10;San Jerónimo,6.44,-75.73;San José de la Montaña,6.85,-75.68;San Juan de Urabá,8.76,-76.53;San Luis,6.04,-74.99;San Pedro de los Milagros,6.46,-75.56;San Pedro de Urabá,8.28,-76.38;San Rafael,6.29,-75.03;San Roque,6.49,-75.02;San Vicente Ferrer,6.28,-75.33;Santa Bárbara,5.88,-75.57;Santa Rosa de Osos,6.65,-75.46;Santo Domingo,6.47,-75.17;El Santuario,6.14,-75.27;Segovia,7.08,-74.70;Sonsón,5.71,-75.31;Sopetrán,6.50,-75.74;Támesis,5.66,-75.71;Tarazá,7.58,-75.40;Tarso,5.86,-75.82;Titiribí,6.06,-75.79;Toledo,7.01,-75.69;Turbo,8.09,-76.73;Uramita,6.90,-76.17;Urrao,6.32,-76.13;Valdivia,7.16,-75.44;Valparaíso,5.61,-75.62;Vegachí,6.77,-74.80;Venecia,5.96,-75.74;Vigía del Fuerte,6.59,-76.89;Yalí,6.68,-74.84;Yarumal,6.96,-75.42;Yolombó,6.60,-75.01;Yondó,7.00,-73.91;Zaragoza,7.49,-74.87
+Atlántico|Barranquilla,10.96,-74.80;Baranoa,10.79,-74.92;Campo de la Cruz,10.38,-74.88;Candelaria,10.46,-74.88;Galapa,10.90,-74.89;Juan de Acosta,10.83,-75.04;Luruaco,10.61,-75.14;Malambo,10.86,-74.77;Manatí,10.45,-74.96;Palmar de Varela,10.74,-74.75;Piojó,10.75,-75.11;Polonuevo,10.78,-74.85;Ponedera,10.64,-74.75;Puerto Colombia,10.99,-74.95;Repelón,10.49,-75.12;Sabanagrande,10.79,-74.76;Sabanalarga,10.63,-74.92;Santa Lucía,10.32,-74.96;Santo Tomás,10.76,-74.75;Soledad,10.91,-74.77;Suan,10.33,-74.88;Tubará,10.87,-74.98;Usiacurí,10.74,-74.98
+Bogotá D.C.|Bogotá,4.65,-74.08
+Bolívar|Cartagena de Indias,10.39,-75.51;Achí,8.57,-74.56;Altos del Rosario,8.79,-74.16;Arenal,8.46,-73.94;Arjona,10.25,-75.34;Arroyohondo,10.25,-75.02;Barranco de Loba,8.95,-74.11;Calamar,10.25,-74.92;Cantagallo,7.38,-73.92;Cicuco,9.27,-74.65;Córdoba,9.59,-74.83;Clemencia,10.57,-75.33;El Carmen de Bolívar,9.72,-75.12;El Guamo,10.03,-74.98;El Peñón,8.99,-73.95;Hatillo de Loba,8.96,-74.08;Magangué,9.24,-74.75;Mahates,10.23,-75.19;Margarita,9.16,-74.29;María La Baja,9.98,-75.30;Montecristo,8.30,-74.47;Mompós,9.24,-74.43;Morales,8.28,-73.87;Norosí,8.53,-74.04;Pinillos,8.92,-74.46;Regidor,8.67,-73.82;Río Viejo,8.59,-73.86;San Cristóbal,10.39,-75.07;San Estanislao,10.40,-75.15;San Fernando,9.21,-74.32;San Jacinto,9.83,-75.12;San Jacinto del Cauca,8.25,-74.72;San Juan Nepomuceno,9.95,-75.08;San Martín de Loba,8.94,-74.04;San Pablo,7.48,-73.92;Santa Catalina,10.60,-75.29;Santa Rosa,10.44,-75.37;Santa Rosa del Sur,7.96,-74.05;Simití,7.96,-73.95;Soplaviento,10.39,-75.14;Talaigua Nuevo,9.30,-74.57;Tiquisio,8.56,-74.26;Turbaco,10.33,-75.41;Turbaná,10.27,-75.44;Villanueva,10.44,-75.27;Zambrano,9.75,-74.82
+Boyacá|Tunja,5.54,-73.36;Almeida,4.97,-73.38;Aquitania,5.52,-72.88;Arcabuco,5.76,-73.44;Belén,6.01,-72.91;Berbeo,5.23,-73.13;Betéitiva,5.91,-72.81;Boavita,6.33,-72.58;Boyacá,5.45,-73.36;Briceño,5.69,-73.92;Buenavista,5.51,-73.94;Busbanzá,5.83,-72.88;Caldas,5.55,-73.87;Campohermoso,5.03,-73.10;Cerinza,5.96,-72.95;Chinavita,5.17,-73.37;Chiquinquirá,5.62,-73.82;Chiscas,6.55,-72.50;Chita,6.19,-72.47;Chitaraque,6.03,-73.45;Chivatá,5.56,-73.28;Ciénega,5.41,-73.30;Cómbita,5.63,-73.32;Coper,5.47,-74.05;Corrales,5.83,-72.85;Covarachía,6.50,-72.74;Cubará,7.00,-72.11;Cucaita,5.54,-73.45;Cuítiva,5.58,-72.97;Chíquiza,5.60,-73.45;Chivor,4.89,-73.37;Duitama,5.83,-73.03;El Cocuy,6.41,-72.44;El Espino,6.48,-72.50;Firavitoba,5.67,-72.99;Floresta,5.86,-72.92;Gachantivá,5.75,-73.55;Gámeza,5.80,-72.81;Garagoa,5.08,-73.36;Guacamayas,6.46,-72.50;Guateque,5.01,-73.47;Guayatá,4.97,-73.49;Güicán,6.46,-72.41;Iza,5.61,-72.98;Jenesano,5.39,-73.36;Jericó,6.15,-72.57;Labranzagrande,5.56,-72.58;La Capilla,5.10,-73.44;La Victoria,5.52,-74.23;La Uvita,6.32,-72.56;Villa de Leyva,5.63,-73.53;Macanal,4.97,-73.32;Maripí,5.55,-74.00;Miraflores,5.20,-73.15;Mongua,5.75,-72.80;Monguí,5.72,-72.85;Moniquirá,5.88,-73.57;Motavita,5.58,-73.37;Muzo,5.53,-74.11;Nobsa,5.77,-72.94;Nuevo Colón,5.35,-73.46;Oicatá,5.60,-73.31;Otanche,5.66,-74.18;Pachavita,5.14,-73.40;Páez,5.10,-73.05;Paipa,5.78,-73.12;Pajarito,5.29,-72.70;Panqueba,6.44,-72.46;Pauna,5.66,-73.98;Paya,5.63,-72.42;Paz de Río,5.99,-72.75;Pesca,5.56,-73.05;Pisba,5.73,-72.48;Puerto Boyacá,5.98,-74.59;Quípama,5.52,-74.18;Ramiriquí,5.40,-73.34;Ráquira,5.54,-73.63;Rondón,5.36,-73.21;Saboyá,5.70,-73.77;Sáchica,5.58,-73.54;Samacá,5.49,-73.49;San Eduardo,5.22,-73.08;San José de Pare,6.02,-73.55;San Luis de Gaceno,4.82,-73.17;San Mateo,6.40,-72.55;San Miguel de Sema,5.52,-73.72;San Pablo de Borbur,5.65,-74.07;Santana,6.06,-73.48;Santa María,4.86,-73.26;Santa Rosa de Viterbo,5.87,-72.98;Santa Sofía,5.71,-73.60;Sativanorte,6.13,-72.71;Sativasur,6.09,-72.71;Siachoque,5.51,-73.24;Soatá,6.33,-72.68;Socotá,6.04,-72.64;Socha,5.99,-72.69;Sogamoso,5.72,-72.93;Somondoco,4.99,-73.43;Sora,5.57,-73.45;Sotaquirá,5.76,-73.25;Soracá,5.50,-73.33;Susacón,6.23,-72.69;Sutamarchán,5.62,-73.62;Sutatenza,5.02,-73.45;Tasco,5.91,-72.78;Tenza,5.08,-73.42;Tibaná,5.32,-73.40;Tibasosa,5.75,-73.00;Tinjacá,5.58,-73.65;Tipacoque,6.42,-72.69;Toca,5.56,-73.19;Togüí,5.94,-73.51;Tópaga,5.77,-72.83;Tota,5.56,-72.99;Tununguá,5.73,-73.93;Turmequé,5.32,-73.49;Tuta,5.69,-73.23;Tutazá,6.03,-72.86;Úmbita,5.22,-73.46;Ventaquemada,5.37,-73.52;Viracachá,5.44,-73.30;Zetaquira,5.28,-73.17
+Caldas|Manizales,5.07,-75.52;Aguadas,5.61,-75.46;Anserma,5.24,-75.78;Aranzazu,5.27,-75.49;Belalcázar,4.99,-75.81;Chinchiná,4.98,-75.60;Filadelfia,5.30,-75.56;La Dorada,5.45,-74.66;La Merced,5.40,-75.55;Manzanares,5.25,-75.16;Marmato,5.47,-75.60;Marquetalia,5.30,-75.05;Marulanda,5.28,-75.26;Neira,5.17,-75.52;Norcasia,5.57,-74.89;Pácora,5.53,-75.46;Palestina,5.02,-75.62;Pensilvania,5.38,-75.16;Riosucio,5.42,-75.70;Risaralda,5.17,-75.77;Salamina,5.40,-75.49;Samaná,5.41,-74.99;San José,5.08,-75.79;Supía,5.45,-75.65;Victoria,5.32,-74.91;Villamaría,5.04,-75.51;Viterbo,5.06,-75.87
+Caquetá|Florencia,1.61,-75.61;Albania,1.33,-75.88;Belén de los Andaquíes,1.42,-75.87;Cartagena del Chairá,1.33,-74.84;Curillo,1.03,-75.92;El Doncello,1.68,-75.28;El Paujil,1.57,-75.33;La Montañita,1.48,-75.44;Milán,1.29,-75.51;Morelia,1.49,-75.73;Puerto Rico,1.91,-75.16;San José del Fragua,1.33,-75.97;San Vicente del Caguán,2.12,-74.77;Solano,0.70,-75.25;Solita,0.87,-75.62;Valparaíso,1.19,-75.71
+Casanare|Yopal,5.34,-72.39;Aguazul,5.17,-72.55;Chámeza,5.21,-72.87;Hato Corozal,6.15,-71.77;La Salina,6.13,-72.33;Maní,4.82,-72.28;Monterrey,4.88,-72.90;Nunchía,5.64,-72.20;Orocué,4.79,-71.34;Paz de Ariporo,5.88,-71.89;Pore,5.73,-71.99;Recetor,5.23,-72.76;Sabanalarga,4.86,-73.04;Sácama,6.10,-72.25;San Luis de Palenque,5.42,-71.73;Támara,5.83,-72.16;Tauramena,5.02,-72.75;Trinidad,5.41,-71.66;Villanueva,4.61,-72.93
+Cauca|Popayán,2.44,-76.61;Almaguer,1.91,-76.86;Argelia,2.26,-77.25;Balboa,2.04,-77.22;Bolívar,1.84,-76.97;Buenos Aires,3.02,-76.64;Cajibío,2.62,-76.57;Caldono,2.80,-76.48;Caloto,3.03,-76.41;Corinto,3.17,-76.26;El Tambo,2.45,-76.81;Florencia,1.68,-77.07;Guachené,3.13,-76.39;Guapí,2.57,-77.89;Inzá,2.55,-76.06;Jambaló,2.78,-76.32;La Sierra,2.18,-76.76;La Vega,2.00,-76.78;López de Micay,2.85,-77.25;Mercaderes,1.80,-77.17;Miranda,3.25,-76.23;Morales,2.75,-76.63;Padilla,3.22,-76.31;Páez,2.65,-75.97;Patía,2.12,-77.06;Piamonte,1.12,-76.33;Piendamó,2.64,-76.53;Puerto Tejada,3.23,-76.42;Puracé,2.34,-76.50;Rosas,2.26,-76.74;San Sebastián,1.84,-76.77;Santander de Quilichao,3.01,-76.48;Santa Rosa,1.70,-76.57;Silvia,2.61,-76.38;Sotará,2.25,-76.61;Suárez,2.96,-76.69;Sucre,2.04,-76.93;Timbío,2.35,-76.68;Timbiquí,2.78,-77.67;Toribío,2.95,-76.27;Totoró,2.51,-76.40;Villa Rica,3.18,-76.46
+Cesar|Valledupar,10.46,-73.25;Aguachica,8.31,-73.62;Agustín Codazzi,10.04,-73.24;Astrea,9.50,-73.98;Becerril,9.70,-73.28;Bosconia,9.98,-73.89;Chimichagua,9.26,-73.81;Chiriguaná,9.36,-73.60;Curumaní,9.20,-73.54;El Copey,10.15,-73.96;El Paso,9.66,-73.75;Gamarra,8.33,-73.74;González,8.39,-73.38;La Gloria,8.62,-73.80;La Jagua de Ibirico,9.56,-73.33;Manaure Balcón del Cesar,10.39,-73.03;Pailitas,8.96,-73.63;Pelaya,8.69,-73.67;Pueblo Bello,10.42,-73.59;Río de Oro,8.29,-73.39;La Paz,10.39,-73.17;San Alberto,7.76,-73.39;San Diego,10.34,-73.18;San Martín,7.99,-73.51;Tamalameque,8.86,-73.81
+Chocó|Quibdó,5.69,-76.66;Acandí,8.51,-77.28;Alto Baudó,5.52,-76.97;Atrato,5.53,-76.64;Bagadó,5.41,-76.42;Bahía Solano,6.22,-77.40;Bajo Baudó,4.95,-77.36;Bojayá,6.56,-76.89;El Cantón del San Pablo,5.34,-76.73;Carmen del Darién,7.16,-76.97;Cértegui,5.37,-76.61;Condoto,5.10,-76.65;El Carmen de Atrato,5.90,-76.14;El Litoral del San Juan,4.25,-77.36;Istmina,5.16,-76.69;Juradó,7.10,-77.76;Lloró,5.50,-76.55;Medio Atrato,5.99,-76.78;Medio Baudó,5.19,-76.95;Medio San Juan,5.09,-76.70;Nóvita,4.96,-76.61;Nuquí,5.71,-77.27;Río Iró,5.18,-76.47;Río Quito,5.48,-76.74;Riosucio,7.44,-77.12;San José del Palmar,4.90,-76.23;Sipí,4.65,-76.64;Tadó,5.27,-76.56;Unguía,8.04,-77.09;Unión Panamericana,5.28,-76.63
+Córdoba|Montería,8.75,-75.88;Ayapel,8.31,-75.14;Buenavista,8.22,-75.48;Canalete,8.79,-76.24;Cereté,8.88,-75.79;Chimá,9.15,-75.63;Chinú,9.11,-75.40;Ciénaga de Oro,8.88,-75.62;Cotorra,9.04,-75.79;La Apartada,8.05,-75.33;Lorica,9.24,-75.81;Los Córdobas,8.89,-76.35;Momil,9.24,-75.68;Montelíbano,7.98,-75.42;Moñitos,9.25,-76.13;Planeta Rica,8.41,-75.58;Pueblo Nuevo,8.50,-75.51;Puerto Escondido,9.02,-76.26;Puerto Libertador,7.89,-75.67;Purísima,9.24,-75.72;Sahagún,8.95,-75.45;San Andrés de Sotavento,9.15,-75.51;San Antero,9.37,-75.76;San Bernardo del Viento,9.35,-75.95;San Carlos,8.80,-75.70;San José de Uré,7.79,-75.53;San Pelayo,8.96,-75.84;Tierralta,8.17,-76.06;Tuchín,9.19,-75.55;Valencia,8.26,-76.15
+Cundinamarca|Agua de Dios,4.38,-74.67;Albán,4.88,-74.44;Anapoima,4.55,-74.54;Anolaima,4.76,-74.46;Arbeláez,4.27,-74.42;Beltrán,4.80,-74.74;Bituima,4.87,-74.54;Bojacá,4.73,-74.34;Cabrera,3.98,-74.48;Cachipay,4.73,-74.44;Cajicá,4.92,-74.03;Caparrapí,5.35,-74.49;Cáqueza,4.41,-73.95;Carmen de Carupa,5.35,-73.90;Chaguaní,4.95,-74.59;Chía,4.86,-74.06;Chipaque,4.44,-74.04;Choachí,4.53,-73.92;Chocontá,5.15,-73.68;Cogua,5.06,-73.98;Cota,4.81,-74.10;Cucunubá,5.25,-73.77;El Colegio,4.58,-74.44;El Peñón,5.25,-74.29;El Rosal,4.85,-74.26;Facatativá,4.81,-74.36;Fómeque,4.49,-73.90;Fosca,4.34,-73.94;Funza,4.72,-74.21;Fúquene,5.40,-73.80;Fusagasugá,4.34,-74.36;Gachalá,4.69,-73.52;Gachancipá,4.99,-73.87;Gachetá,4.82,-73.64;Gama,4.76,-73.61;Girardot,4.30,-74.80;Granada,4.52,-74.35;Guachetá,5.38,-73.69;Guaduas,5.07,-74.60;Guasca,4.87,-73.88;Guataquí,4.52,-74.79;Guatavita,4.94,-73.83;Guayabal de Síquima,4.88,-74.47;Guayabetal,4.21,-73.82;Gutiérrez,4.25,-74.00;Jerusalén,4.56,-74.70;Junín,4.79,-73.66;La Calera,4.72,-73.97;La Mesa,4.63,-74.46;La Palma,5.36,-74.39;La Peña,5.20,-74.39;La Vega,4.99,-74.34;Lenguazaque,5.31,-73.71;Machetá,5.08,-73.61;Madrid,4.73,-74.26;Manta,4.95,-73.53;Medina,4.51,-73.35;Mosquera,4.71,-74.23;Nariño,4.40,-74.82;Nemocón,5.07,-73.88;Nilo,4.31,-74.62;Nimaima,5.13,-74.39;Nocaima,5.07,-74.38;Venecia,4.09,-74.48;Pacho,5.13,-74.16;Paime,5.37,-74.15;Pandi,4.19,-74.49;Paratebueno,4.38,-73.21;Pasca,4.31,-74.30;Puerto Salgar,5.47,-74.65;Pulí,4.68,-74.71;Quebradanegra,5.12,-74.48;Quetame,4.33,-73.86;Quipile,4.75,-74.53;Apulo,4.52,-74.59;Ricaurte,4.28,-74.77;San Antonio del Tequendama,4.62,-74.35;San Bernardo,4.18,-74.42;San Cayetano,5.33,-74.03;San Francisco,4.97,-74.29;San Juan de Rioseco,4.85,-74.62;Sasaima,4.96,-74.43;Sesquilé,5.04,-73.80;Sibaté,4.49,-74.26;Silvania,4.40,-74.39;Simijaca,5.50,-73.85;Soacha,4.58,-74.22;Sopó,4.91,-73.94;Subachoque,4.93,-74.17;Suesca,5.10,-73.80;Supatá,5.06,-74.24;Susa,5.45,-73.81;Sutatausa,5.25,-73.85;Tabio,4.92,-74.10;Tausa,5.20,-73.89;Tena,4.66,-74.39;Tenjo,4.87,-74.14;Tibacuy,4.35,-74.45;Tibirita,5.05,-73.50;Tocaima,4.46,-74.64;Tocancipá,4.97,-73.91;Topaipí,5.33,-74.30;Ubalá,4.75,-73.53;Ubaque,4.48,-73.93;Villa de San Diego de Ubaté,5.31,-73.82;Une,4.40,-74.03;Útica,5.19,-74.48;Vergara,5.12,-74.35;Vianí,4.88,-74.56;Villagómez,5.27,-74.20;Villapinzón,5.22,-73.60;Villeta,5.01,-74.47;Viotá,4.44,-74.52;Yacopí,5.46,-74.34;Zipacón,4.76,-74.38;Zipaquirá,5.02,-74.00
+Huila|Neiva,2.93,-75.28;Acevedo,1.81,-75.89;Agrado,2.26,-75.77;Aipe,3.22,-75.24;Algeciras,2.52,-75.32;Altamira,2.06,-75.79;Baraya,3.15,-75.05;Campoalegre,2.69,-75.33;Colombia,3.38,-74.80;Elías,2.01,-75.94;Garzón,2.20,-75.63;Gigante,2.39,-75.55;Guadalupe,2.03,-75.76;Hobo,2.58,-75.45;Íquira,2.65,-75.64;Isnos,1.93,-76.22;La Argentina,2.20,-75.98;La Plata,2.39,-75.89;Nátaga,2.55,-75.81;Oporapa,2.03,-75.99;Paicol,2.45,-75.77;Palermo,2.89,-75.43;Palestina,1.72,-76.13;Pital,2.27,-75.80;Pitalito,1.85,-76.05;Rivera,2.78,-75.26;Saladoblanco,1.99,-76.04;San Agustín,1.88,-76.27;Santa María,2.94,-75.59;Suaza,1.98,-75.80;Tarqui,2.11,-75.82;Tesalia,2.48,-75.73;Tello,3.07,-75.14;Teruel,2.74,-75.57;Timaná,1.97,-75.93;Villavieja,3.22,-75.22;Yaguará,2.66,-75.52
+La Guajira|Riohacha,11.54,-72.91;Albania,11.16,-72.59;Barrancas,10.96,-72.79;Dibulla,11.27,-73.31;Distracción,10.90,-72.89;El Molino,10.65,-72.92;Fonseca,10.89,-72.85;Hatonuevo,11.07,-72.77;La Jagua del Pilar,10.51,-73.07;Maicao,11.38,-72.24;Manaure,11.78,-72.44;San Juan del Cesar,10.77,-73.00;Uribia,11.71,-72.27;Urumita,10.56,-73.01;Villanueva,10.61,-72.98
+Magdalena|Santa Marta,11.24,-74.20;Algarrobo,10.19,-74.06;Aracataca,10.59,-74.19;Ariguaní,9.85,-74.24;Cerro de San Antonio,10.33,-74.87;Chivolo,10.03,-74.62;Ciénaga,11.01,-74.25;Concordia,10.26,-74.83;El Banco,9.00,-73.97;El Piñón,10.40,-74.82;El Retén,10.61,-74.27;Fundación,10.52,-74.19;Guamal,9.14,-74.22;Nueva Granada,9.80,-74.39;Pedraza,10.19,-74.92;Pijiño del Carmen,9.33,-74.45;Pivijay,10.46,-74.61;Plato,9.79,-74.78;Puebloviejo,10.99,-74.28;Remolino,10.70,-74.72;Sabanas de San Ángel,10.03,-74.21;Salamina,10.49,-74.79;San Sebastián de Buenavista,9.24,-74.35;San Zenón,9.24,-74.50;Santa Ana,9.32,-74.57;Santa Bárbara de Pinto,9.43,-74.70;Sitionuevo,10.78,-74.72;Tenerife,9.90,-74.86;Zapayán,10.17,-74.72;Zona Bananera,10.76,-74.15
+Meta|Villavicencio,4.14,-73.63;Acacías,3.99,-73.76;Barranca de Upía,4.57,-72.96;Cabuyaro,4.29,-72.79;Castilla la Nueva,3.83,-73.69;Cubarral,3.79,-73.84;Cumaral,4.27,-73.49;El Calvario,4.35,-73.71;El Castillo,3.56,-73.79;El Dorado,3.74,-73.83;Fuente de Oro,3.46,-73.62;Granada,3.55,-73.71;Guamal,3.88,-73.77;Mapiripán,2.89,-72.13;Mesetas,3.38,-74.04;La Macarena,2.18,-73.79;Uribe,3.24,-74.35;Lejanías,3.53,-74.02;Puerto Concordia,2.62,-72.76;Puerto Gaitán,4.31,-72.08;Puerto López,4.08,-72.96;Puerto Lleras,3.27,-73.37;Puerto Rico,2.94,-73.21;Restrepo,4.26,-73.56;San Carlos de Guaroa,3.71,-73.24;San Juan de Arama,3.37,-73.88;San Juanito,4.46,-73.68;San Martín,3.70,-73.70;Vista Hermosa,3.12,-73.75
+Nariño|Pasto,1.21,-77.28;Albán,1.47,-77.08;Aldana,0.88,-77.70;Ancuya,1.26,-77.51;Arboleda,1.50,-77.14;Barbacoas,1.67,-78.14;Belén,1.60,-77.02;Buesaco,1.38,-77.16;Colón,1.64,-76.97;Consacá,1.21,-77.47;Contadero,0.91,-77.55;Córdoba,0.85,-77.52;Cuaspud,0.86,-77.73;Cumbal,0.91,-77.79;Cumbitara,1.65,-77.58;Chachagüí,1.36,-77.28;El Charco,2.48,-78.11;El Peñol,1.45,-77.44;El Rosario,1.74,-77.34;El Tablón de Gómez,1.43,-77.10;El Tambo,1.41,-77.39;Funes,1.00,-77.45;Guachucal,0.96,-77.73;Guaitarilla,1.13,-77.55;Gualmatán,0.92,-77.57;Iles,0.97,-77.52;Imués,1.06,-77.50;Ipiales,0.83,-77.64;La Cruz,1.60,-76.97;La Florida,1.30,-77.41;La Llanada,1.47,-77.58;La Tola,2.40,-78.19;La Unión,1.60,-77.13;Leiva,1.93,-77.31;Linares,1.35,-77.52;Los Andes,1.49,-77.52;Magüí,1.77,-78.18;Mallama,1.14,-77.86;Mosquera,2.51,-78.45;Nariño,1.29,-77.36;Olaya Herrera,2.35,-78.33;Ospina,1.06,-77.57;Francisco Pizarro,2.04,-78.66;Policarpa,1.63,-77.46;Potosí,0.81,-77.57;Providencia,1.24,-77.60;Puerres,0.88,-77.50;Pupiales,0.87,-77.64;Ricaurte,1.21,-77.99;Roberto Payán,1.70,-78.25;Samaniego,1.34,-77.59;Sandoná,1.28,-77.47;San Bernardo,1.51,-77.05;San Lorenzo,1.50,-77.22;San Pablo,1.67,-77.01;San Pedro de Cartago,1.55,-77.12;Santa Bárbara,2.45,-77.98;Santacruz,1.22,-77.68;Sapuyes,1.04,-77.62;Taminango,1.57,-77.28;Tangua,1.09,-77.39;San Andrés de Tumaco,1.80,-78.76;Túquerres,1.09,-77.62;Yacuanquer,1.12,-77.40
+Norte de Santander|Cúcuta,7.89,-72.50;Ábrego,8.08,-73.22;Arboledas,7.64,-72.80;Bochalema,7.61,-72.65;Bucarasica,8.04,-72.87;Cácota,7.27,-72.64;Cáchira,7.74,-73.05;Chinácota,7.60,-72.60;Chitagá,7.14,-72.66;Convención,8.47,-73.34;Cucutilla,7.54,-72.77;Durania,7.71,-72.66;El Carmen,8.51,-73.45;El Tarra,8.58,-73.10;El Zulia,7.94,-72.60;Gramalote,7.89,-72.80;Hacarí,8.32,-73.15;Herrán,7.51,-72.48;Labateca,7.30,-72.50;La Esperanza,7.64,-73.33;La Playa,8.21,-73.24;Los Patios,7.84,-72.51;Lourdes,7.95,-72.83;Mutiscua,7.30,-72.75;Ocaña,8.24,-73.36;Pamplona,7.38,-72.65;Pamplonita,7.44,-72.64;Puerto Santander,8.36,-72.41;Ragonvalia,7.58,-72.48;Salazar,7.77,-72.81;San Calixto,8.40,-73.21;San Cayetano,7.88,-72.62;Santiago,7.87,-72.72;Sardinata,8.08,-72.80;Silos,7.20,-72.76;Teorama,8.44,-73.29;Tibú,8.64,-72.74;Toledo,7.31,-72.48;Villa Caro,7.91,-72.97;Villa del Rosario,7.83,-72.47
+Quindío|Armenia,4.53,-75.68;Buenavista,4.36,-75.74;Calarcá,4.53,-75.64;Circasia,4.62,-75.64;Córdoba,4.39,-75.69;Filandia,4.67,-75.66;Génova,4.21,-75.79;La Tebaida,4.45,-75.79;Montenegro,4.57,-75.75;Pijao,4.33,-75.70;Quimbaya,4.62,-75.76;Salento,4.64,-75.57
+Risaralda|Pereira,4.81,-75.69;Apía,5.10,-75.94;Balboa,4.95,-75.96;Belén de Umbría,5.20,-75.87;Dosquebradas,4.84,-75.67;Guática,5.32,-75.80;La Celia,5.00,-76.00;La Virginia,4.90,-75.88;Marsella,4.94,-75.74;Mistrató,5.30,-75.88;Pueblo Rico,5.22,-76.03;Quinchía,5.34,-75.73;Santa Rosa de Cabal,4.87,-75.62;Santuario,5.07,-75.96
+Santander|Bucaramanga,7.12,-73.12;Aguada,6.16,-73.52;Albania,5.76,-73.91;Aratoca,6.69,-73.02;Barbosa,5.93,-73.62;Barichara,6.64,-73.22;Barrancabermeja,7.07,-73.85;Betulia,6.90,-73.28;Bolívar,5.99,-73.77;Cabrera,6.59,-73.25;California,7.35,-72.95;Capitanejo,6.53,-72.69;Carcasí,6.63,-72.63;Cepitá,6.75,-72.97;Cerrito,6.84,-72.69;Charalá,6.29,-73.15;Charta,7.28,-72.97;Chima,6.35,-73.37;Chipatá,6.06,-73.64;Cimitarra,6.32,-73.95;Concepción,6.77,-72.69;Confines,6.36,-73.24;Contratación,6.29,-73.47;Coromoro,6.29,-73.04;Curití,6.61,-73.07;El Carmen de Chucurí,6.70,-73.51;El Guacamayo,6.25,-73.50;El Peñón,6.06,-73.82;El Playón,7.47,-73.20;Encino,6.14,-73.10;Enciso,6.67,-72.70;Florián,5.80,-73.97;Floridablanca,7.07,-73.09;Galán,6.64,-73.29;Gámbita,5.95,-73.34;Girón,7.07,-73.17;Guaca,6.88,-72.86;Guadalupe,6.25,-73.42;Guapotá,6.31,-73.32;Guavatá,5.95,-73.70;Güepsa,6.02,-73.57;Hato,6.54,-73.31;Jesús María,5.88,-73.78;Jordán,6.73,-73.10;La Belleza,5.86,-73.97;Landázuri,6.22,-73.81;La Paz,6.18,-73.59;Lebrija,7.11,-73.22;Los Santos,6.76,-73.10;Macaravita,6.51,-72.59;Málaga,6.70,-72.73;Matanza,7.32,-73.02;Mogotes,6.48,-72.97;Molagavita,6.67,-72.81;Ocamonte,6.34,-73.12;Oiba,6.26,-73.30;Onzaga,6.34,-72.82;Palmar,6.54,-73.29;Palmas del Socorro,6.41,-73.29;Páramo,6.42,-73.17;Piedecuesta,6.99,-73.05;Pinchote,6.53,-73.17;Puente Nacional,5.88,-73.68;Puerto Parra,6.65,-74.06;Puerto Wilches,7.35,-73.90;Rionegro,7.27,-73.15;Sabana de Torres,7.39,-73.50;San Andrés,6.81,-72.85;San Benito,6.13,-73.51;San Gil,6.55,-73.13;San Joaquín,6.43,-72.87;San José de Miranda,6.66,-72.73;San Miguel,6.57,-72.64;San Vicente de Chucurí,6.88,-73.41;Santa Bárbara,6.99,-72.91;Santa Helena del Opón,6.34,-73.62;Simacota,6.44,-73.34;Socorro,6.47,-73.26;Suaita,6.10,-73.44;Sucre,5.92,-73.79;Suratá,7.37,-72.98;Tona,7.20,-72.97;Valle de San José,6.45,-73.14;Vélez,6.01,-73.67;Vetas,7.31,-72.87;Villanueva,6.67,-73.17;Zapatoca,6.82,-73.27
+Sucre|Sincelejo,9.30,-75.40;Buenavista,9.32,-74.97;Caimito,8.79,-75.12;Colosó,9.49,-75.35;Corozal,9.32,-75.29;Coveñas,9.40,-75.68;Chalán,9.55,-75.31;El Roble,9.10,-75.19;Galeras,9.16,-75.05;Guaranda,8.47,-74.54;La Unión,8.85,-75.28;Los Palmitos,9.38,-75.27;Majagual,8.54,-74.63;Morroa,9.33,-75.31;Ovejas,9.53,-75.23;Palmito,9.33,-75.54;Sampués,9.18,-75.38;San Benito Abad,8.93,-75.03;San Juan de Betulia,9.27,-75.24;San Marcos,8.66,-75.13;San Onofre,9.74,-75.53;San Pedro,9.40,-75.07;San Luis de Sincé,9.24,-75.15;Sucre,8.81,-74.72;Santiago de Tolú,9.52,-75.58;Tolú Viejo,9.45,-75.44
+Tolima|Ibagué,4.44,-75.23;Alpujarra,3.39,-74.93;Alvarado,4.57,-74.95;Ambalema,4.78,-74.76;Anzoátegui,4.63,-75.09;Armero,4.96,-74.90;Ataco,3.59,-75.38;Cajamarca,4.44,-75.43;Carmen de Apicalá,4.15,-74.72;Casabianca,5.08,-75.12;Chaparral,3.72,-75.48;Coello,4.29,-74.90;Coyaima,3.80,-75.19;Cunday,4.06,-74.69;Dolores,3.54,-74.90;Espinal,4.15,-74.88;Falan,5.12,-74.95;Flandes,4.29,-74.81;Fresno,5.15,-75.04;Guamo,4.03,-74.97;Herveo,5.08,-75.18;Honda,5.21,-74.74;Icononzo,4.18,-74.53;Lérida,4.86,-74.91;Líbano,4.92,-75.06;San Sebastián de Mariquita,5.20,-74.89;Melgar,4.20,-74.64;Murillo,4.87,-75.17;Natagaima,3.62,-75.09;Ortega,3.94,-75.22;Palocabildo,5.12,-75.02;Piedras,4.54,-74.88;Planadas,3.20,-75.64;Prado,3.75,-74.93;Purificación,3.86,-74.93;Rioblanco,3.53,-75.64;Roncesvalles,4.01,-75.61;Rovira,4.24,-75.24;Saldaña,3.93,-75.02;San Antonio,3.91,-75.48;San Luis,4.13,-75.10;Santa Isabel,4.71,-75.10;Suárez,4.05,-74.83;Valle de San Juan,4.20,-75.12;Venadillo,4.72,-74.93;Villahermosa,5.03,-75.12;Villarrica,3.94,-74.60
+Valle del Cauca|Cali,3.45,-76.53;Alcalá,4.67,-75.78;Andalucía,4.17,-76.17;Ansermanuevo,4.80,-75.99;Argelia,4.73,-76.12;Bolívar,4.34,-76.19;Buenaventura,3.88,-77.03;Guadalajara de Buga,3.90,-76.30;Bugalagrande,4.21,-76.16;Caicedonia,4.33,-75.83;Calima El Darién,3.93,-76.48;Candelaria,3.41,-76.35;Cartago,4.75,-75.91;Dagua,3.66,-76.69;El Águila,4.91,-76.04;El Cairo,4.76,-76.22;El Cerrito,3.69,-76.31;El Dovio,4.51,-76.24;Florida,3.32,-76.23;Ginebra,3.72,-76.27;Guacarí,3.76,-76.33;Jamundí,3.26,-76.54;La Cumbre,3.65,-76.57;La Unión,4.53,-76.10;La Victoria,4.52,-76.04;Obando,4.58,-75.97;Palmira,3.54,-76.30;Pradera,3.42,-76.24;Restrepo,3.82,-76.52;Riofrío,4.16,-76.29;Roldanillo,4.41,-76.15;San Pedro,3.99,-76.23;Sevilla,4.27,-75.93;Toro,4.61,-76.08;Trujillo,4.21,-76.32;Tuluá,4.08,-76.20;Ulloa,4.70,-75.74;Versalles,4.57,-76.20;Vijes,3.70,-76.44;Yotoco,3.86,-76.38;Yumbo,3.58,-76.49;Zarzal,4.39,-76.07
+Arauca|Arauca,7.08,-70.76;Arauquita,7.03,-71.43;Cravo Norte,6.30,-70.20;Fortul,6.80,-71.77;Puerto Rondón,6.28,-71.10;Saravena,6.95,-71.88;Tame,6.46,-71.73
+Putumayo|Mocoa,1.15,-76.65;Colón,1.19,-76.97;Orito,0.67,-76.87;Puerto Asís,0.50,-76.50;Puerto Caicedo,0.69,-76.60;Puerto Guzmán,0.96,-76.41;Puerto Leguízamo,-0.19,-74.78;Sibundoy,1.20,-76.92;San Francisco,1.18,-76.88;San Miguel,0.34,-76.91;Santiago,1.15,-77.00;Valle del Guamuez,0.43,-76.91;Villagarzón,1.03,-76.62
+San Andrés y Providencia|San Andrés,12.58,-81.70;Providencia,13.35,-81.37
+Amazonas|Leticia,-4.21,-69.94;Puerto Nariño,-3.77,-70.38;El Encanto,-1.75,-73.21;La Chorrera,-1.44,-72.79;La Pedrera,-1.32,-69.58;Tarapacá,-2.89,-69.74;Puerto Santander,-0.62,-72.38;Mirití-Paraná,-1.12,-70.86;La Victoria,0.05,-71.22;Puerto Alegría,-1.01,-74.02;Puerto Arica,-2.15,-71.75
+Guainía|Inírida,3.87,-67.92;Barrancominas,3.49,-69.81
+Guaviare|San José del Guaviare,2.57,-72.64;Calamar,1.96,-72.65;El Retorno,2.33,-72.63;Miraflores,1.34,-71.95
+Vaupés|Mitú,1.25,-70.23;Carurú,1.01,-71.30;Taraira,-0.57,-69.63
+Vichada|Puerto Carreño,6.19,-67.49;La Primavera,5.49,-70.41;Santa Rosalía,5.13,-70.86;Cumaribo,4.44,-69.80`;
+const MUNIS = [];
+RAW.trim().split('\n').forEach(l=>{const [d,r]=l.split('|');r.split(';').forEach(x=>{const p=x.split(',');MUNIS.push({m:p[0],d,lat:+p[1],lon:+p[2]});});});
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+MUNIS.forEach(o=>{o.k=norm(o.m);o.kd=norm(o.d);});
+
+const DEFAULT_URL = '';
+
+/* ===================== ALMACENAMIENTO ===================== */
+const KEY='precision_clientes_v1', KURL='precision_envio_url';
+let mem = {recs:[], url:''};
+function load(){try{mem.recs=JSON.parse(localStorage.getItem(KEY)||'[]');mem.url=localStorage.getItem(KURL)||'';}catch(e){}if(!mem.url&&DEFAULT_URL.startsWith('https'))mem.url=DEFAULT_URL;}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(mem.recs));return true;}catch(e){toast('⚠ No se pudo guardar en el dispositivo');return false;}}
+load();
+
+/* ===================== UTIL ===================== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600);}
+const uid=()=>'P'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase();
+function fmtCel(v){const d=v.replace(/\D/g,'').slice(0,10);return d.replace(/^(\d{3})(\d{0,3})(\d{0,4}).*/,(m,a,b,c)=>[a,b,c].filter(Boolean).join(' '));}
+
+/* ===================== TABS ===================== */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function showTab(t){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.dataset.tab===t));
+  ['form','list','cfg'].forEach(x=>$('tab-'+x).classList.toggle('hide',x!==t));
+  $('savebar').classList.toggle('hide',t!=='form');
+  if(t==='list')renderList();
+  window.scrollTo(0,0);
+}
+
+/* ===================== CONEXIÓN ===================== */
+function netUI(){const on=navigator.onLine;const n=$('net');n.textContent=on?'En línea':'Sin conexión';n.className='net '+(on?'on':'off');$('btnSat').disabled=!on;if(!on&&mapMode==='tile')setMap('svg');}
+addEventListener('online',()=>{netUI();autoSync();});addEventListener('offline',netUI);
+
+/* ===================== AUTOCOMPLETAR ===================== */
+let cur=null, coordSrc='municipio', pt=null, hi=-1, matches=[];
+const inp=$('muni'), list=$('aclist');
+inp.addEventListener('input',()=>{cur=null;$('sel').style.display='none';suggest();});
+inp.addEventListener('focus',()=>{if(inp.value)suggest();});
+inp.addEventListener('keydown',e=>{
+  if(list.style.display!=='block')return;
+  if(e.key==='ArrowDown'){hi=Math.min(hi+1,matches.length-1);paintHi();e.preventDefault();}
+  else if(e.key==='ArrowUp'){hi=Math.max(hi-1,0);paintHi();e.preventDefault();}
+  else if(e.key==='Enter'){if(matches[hi>=0?hi:0])pick(matches[hi>=0?hi:0]);e.preventDefault();}
+  else if(e.key==='Escape'){closeList();}
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.ac'))closeList();});
+function suggest(){
+  const q=norm(inp.value);
+  if(!q){closeList();return;}
+  const parts=q.split(/[,\s]+/).filter(Boolean);
+  const sc=o=>{
+    if(o.k===q)return 0; if(o.k.startsWith(q))return 1;
+    if(o.k.split(/\s+/).some(w=>w.startsWith(q)))return 2;
+    if(parts.every(p=>o.k.includes(p)||o.kd.includes(p)))return 3;
+    return 9;};
+  matches=MUNIS.map(o=>[sc(o),o]).filter(x=>x[0]<9).sort((a,b)=>a[0]-b[0]||a[1].m.localeCompare(b[1].m,'es')).slice(0,12).map(x=>x[1]);
+  hi=matches.length?0:-1;
+  list.innerHTML=matches.length?matches.map((o,i)=>`<div role="option" data-i="${i}">${hl(o.m,q)}<small>${esc(o.d)}</small></div>`).join(''):'<div class="none">Sin resultados. Revise la ortografía.</div>';
+  list.style.display='block';inp.setAttribute('aria-expanded','true');paintHi();
+  list.querySelectorAll('[data-i]').forEach(d=>d.onmousedown=e=>{e.preventDefault();pick(matches[+d.dataset.i]);});
+}
+function hl(name,q){const n=norm(name);const i=n.indexOf(q);if(i<0)return esc(name);return esc(name.slice(0,i))+'<b>'+esc(name.slice(i,i+q.length))+'</b>'+esc(name.slice(i+q.length));}
+function paintHi(){list.querySelectorAll('[data-i]').forEach((d,i)=>{d.classList.toggle('hi',i===hi);if(i===hi)d.scrollIntoView({block:'nearest'});});}
+function closeList(){list.style.display='none';inp.setAttribute('aria-expanded','false');}
+function pick(o,keepPt){
+  cur=o;inp.value=o.m;closeList();inp.classList.remove('bad');hint('muni','');
+  if(!keepPt){pt={lat:o.lat,lon:o.lon};coordSrc='municipio';}
+  showSel();drawSvg();if(mapMode==='tile')tileCenter(pt.lat,pt.lon,Math.max(tz,12));
+}
+function showSel(){
+  const s=$('sel');if(!cur){s.style.display='none';return;}
+  const src={municipio:'centro del municipio (aprox.)',gps:'GPS del celular',mapa:'punto marcado en el mapa'}[coordSrc];
+  s.innerHTML=`<b>${esc(cur.m)}</b>, ${esc(cur.d)}<br>Coordenadas: <span class="coords">${pt.lat.toFixed(5)}, ${pt.lon.toFixed(5)}</span> · ${src}`;
+  s.style.display='block';
+}
+
+/* ===================== MAPA SIN INTERNET (SVG) ===================== */
+const B={w:-79.2,e:-66.7,n:12.7,s:-4.4}, W=600,H=800, PAD=20;
+const sx=lon=>PAD+(lon-B.w)/(B.e-B.w)*(W-2*PAD), sy=lat=>PAD+(B.n-lat)/(B.n-B.s)*(H-2*PAD);
+const SVGNS='http://www.w3.org/2000/svg';
+let svgZoom=null;
+function buildSvg(){
+  const s=$('svgmap');let h='<rect width="600" height="800" fill="#eef5f6"/>';
+  h+='<g id="dots">';
+  MUNIS.forEach((o,i)=>{if(o.lon<-79.3)return;h+=`<circle cx="${sx(o.lon).toFixed(1)}" cy="${sy(o.lat).toFixed(1)}" r="2.6" fill="#025868" fill-opacity=".38" data-i="${i}"/>`;});
+  h+='</g>';
+  // recuadro San Andrés
+  h+='<g><rect x="24" y="24" width="96" height="70" rx="6" fill="#fff" stroke="#d9e2e4"/><text x="72" y="40" text-anchor="middle" font-size="10" fill="#6f7a7c">San Andrés y Prov.</text>';
+  MUNIS.filter(o=>o.lon<-79.3).forEach(o=>{const i=MUNIS.indexOf(o);h+=`<circle cx="${(72+(o.lon+81.5)*60).toFixed(1)}" cy="${(80-(o.lat-12.5)*40).toFixed(1)}" r="3.5" fill="#025868" fill-opacity=".5" data-i="${i}"/>`;});
+  h+='</g><g id="mk"></g>';
+  h+='<text x="580" y="785" text-anchor="end" font-size="11" fill="#6f7a7c">Cada punto es un municipio · toque uno para seleccionarlo</text>';
+  s.innerHTML=h;
+  s.addEventListener('click',e=>{
+    const c=e.target.closest('circle[data-i]');
+    if(c){pick(MUNIS[+c.dataset.i]);return;}
+    // toque libre: municipio más cercano
+    const p=svgPt(e);if(!p)return;let best=null,bd=1e9;
+    MUNIS.forEach(o=>{if(o.lon<-79.3)return;const d=(sx(o.lon)-p.x)**2+(sy(o.lat)-p.y)**2;if(d<bd){bd=d;best=o;}});
+    if(best&&bd<400)pick(best);
+  });
+}
+function svgPt(e){const s=$('svgmap');const r=s.getBoundingClientRect();const vb=s.viewBox.baseVal;return{x:vb.x+(e.clientX-r.left)/r.width*vb.width,y:vb.y+(e.clientY-r.top)/r.height*vb.height};}
+function drawSvg(){
+  const g=$('mk');if(!g)return;const s=$('svgmap');
+  if(!pt){g.innerHTML='';s.setAttribute('viewBox','0 0 600 800');$('dots').querySelectorAll('circle').forEach(c=>{c.setAttribute('r','2.6');c.setAttribute('fill-opacity','.38');c.setAttribute('fill','#025868');});return;}
+  const ins=pt.lon<-79.3;
+  const x=ins?72+(pt.lon+81.5)*60:sx(pt.lon), y=ins?80-(pt.lat-12.5)*40:sy(pt.lat);
+  const lbl=cur?cur.m:'Punto';
+  const vb=viewFor(ins), k=Math.min(1,vb[2]/600*1.8);
+  s.setAttribute('viewBox',vb.map(v=>v.toFixed(1)).join(' '));
+  const lw=(lbl.length*7.2+16)*k;
+  const lx=Math.max(vb[0]+4*k,Math.min(x-lw/2,vb[0]+vb[2]-lw-4*k));
+  g.innerHTML=`<circle cx="${x}" cy="${y}" r="${16*k}" fill="#FF8A00" fill-opacity=".18"><animate attributeName="r" values="${8*k};${22*k};${8*k}" dur="2s" repeatCount="indefinite"/></circle>
+   <circle cx="${x}" cy="${y}" r="${6.5*k}" fill="#FF8A00" stroke="#fff" stroke-width="${2*k}"/>
+   <g transform="translate(${lx},${y-24*k}) scale(${k})"><rect x="0" y="-13" rx="5" height="22" width="${lbl.length*7.2+16}" fill="#025868"/><text x="8" y="3" font-size="12" font-weight="700" fill="#fff">${esc(lbl)}</text></g>`;
+  $('dots').querySelectorAll('circle').forEach(c=>c.setAttribute('r',(2.6*Math.min(1,k*1.8)).toFixed(2)));
+  // destacar municipios del mismo departamento
+  $('dots').querySelectorAll('circle').forEach(c=>{const o=MUNIS[+c.dataset.i];c.setAttribute('fill-opacity',cur&&o.d===cur.d?'.75':'.25');c.setAttribute('fill',cur&&o.d===cur.d?'#03758a':'#025868');});
+}
+function viewFor(ins){
+  if(!cur||ins)return[0,0,600,800];
+  const ds=MUNIS.filter(o=>o.d===cur.d&&o.lon>-79.3);
+  const x0=Math.min(...ds.map(o=>sx(o.lon))),x1=Math.max(...ds.map(o=>sx(o.lon))),y0=Math.min(...ds.map(o=>sy(o.lat))),y1=Math.max(...ds.map(o=>sy(o.lat)));
+  let w=Math.max(x1-x0,90)*1.6,h=Math.max(y1-y0,120)*1.6;
+  if(w/h>.75)h=w/.75;else w=h*.75;
+  return[(x0+x1)/2-w/2,(y0+y1)/2-h/2,w,h];
+}
+/* ===================== MAPA SATELITAL (con internet) ===================== */
+let mapMode='svg', tz=13, tc={lat:6.46,lon:-75.56};
+const TILE=(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
+const LBL=(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/${z}/${y}/${x}`;
+const lon2x=(lon,z)=>(lon+180)/360*256*2**z;
+const lat2y=(lat,z)=>{const r=lat*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*256*2**z;};
+const x2lon=(x,z)=>x/(256*2**z)*360-180;
+const y2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/(256*2**z);return 180/Math.PI*Math.atan(.5*(Math.exp(n)-Math.exp(-n)));};
+document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>setMap(b.dataset.map));
+function setMap(m){
+  mapMode=m;document.querySelectorAll('[data-map]').forEach(b=>b.classList.toggle('act',b.dataset.map===m));
+  $('svgmap').style.display=m==='svg'?'block':'none';$('tilemap').style.display=m==='tile'?'block':'none';
+  $('mapnote').textContent=m==='tile'?'Toque sobre la imagen para marcar el sitio exacto del predio. Arrastre para moverse.':'Seleccione un municipio, use el GPS del celular, o toque un punto del mapa.';
+  if(m==='tile'){const p=pt||{lat:6.46,lon:-75.56};tileCenter(p.lat,p.lon,pt?(coordSrc==='municipio'?13:16):6);}
+}
+function tileCenter(lat,lon,z){tz=Math.max(5,Math.min(19,z));tc={lat,lon};renderTiles();}
+function renderTiles(){
+  const el=$('tilemap');const W=el.clientWidth||600,H=el.clientHeight||340;
+  const cx=lon2x(tc.lon,tz),cy=lat2y(tc.lat,tz);const ox=cx-W/2,oy=cy-H/2;
+  el.querySelectorAll('img').forEach(i=>i.remove());
+  const n=2**tz;
+  for(let tx=Math.floor(ox/256);tx<=Math.floor((ox+W)/256);tx++)for(let ty=Math.floor(oy/256);ty<=Math.floor((oy+H)/256);ty++){
+    if(ty<0||ty>=n)continue;const wx=((tx%n)+n)%n;
+    [TILE,LBL].forEach(f=>{const im=new Image();im.src=f(tz,wx,ty);im.style.left=(tx*256-ox)+'px';im.style.top=(ty*256-oy)+'px';im.draggable=false;el.insertBefore(im,el.firstChild);});
+  }
+  const pin=$('tpin');
+  if(pt){pin.style.display='block';pin.style.left=(lon2x(pt.lon,tz)-ox)+'px';pin.style.top=(lat2y(pt.lat,tz)-oy)+'px';}else pin.style.display='none';
+}
+$('zin').onclick=e=>{e.stopPropagation();tz=Math.min(19,tz+1);renderTiles();};
+$('zout').onclick=e=>{e.stopPropagation();tz=Math.max(5,tz-1);renderTiles();};
+(function drag(){
+  const el=$('tilemap');let st=null,moved=false;
+  el.addEventListener('pointerdown',e=>{if(e.target.closest('.zoom'))return;st={x:e.clientX,y:e.clientY,cx:lon2x(tc.lon,tz),cy:lat2y(tc.lat,tz)};moved=false;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;if(Math.abs(dx)+Math.abs(dy)>6)moved=true;if(moved){tc={lon:x2lon(st.cx-dx,tz),lat:y2lat(st.cy-dy,tz)};renderTiles();}});
+  el.addEventListener('pointerup',e=>{if(!st)return;if(!moved){const r=el.getBoundingClientRect();const W=el.clientWidth,H=el.clientHeight;
+      const ox=lon2x(tc.lon,tz)-W/2,oy=lat2y(tc.lat,tz)-H/2;
+      pt={lon:x2lon(ox+e.clientX-r.left,tz),lat:y2lat(oy+e.clientY-r.top,tz)};coordSrc='mapa';
+      if(!cur)nearest(pt);showSel();drawSvg();renderTiles();toast('Punto marcado');}
+    st=null;});
+  el.addEventListener('wheel',e=>{e.preventDefault();tz=Math.max(5,Math.min(19,tz+(e.deltaY<0?1:-1)));renderTiles();},{passive:false});
+  addEventListener('resize',()=>{if(mapMode==='tile')renderTiles();});
+})();
+function nearest(p){let best=null,bd=1e9;MUNIS.forEach(o=>{const d=(o.lat-p.lat)**2+((o.lon-p.lon)*Math.cos(p.lat*Math.PI/180))**2;if(d<bd){bd=d;best=o;}});if(best){cur=best;inp.value=best.m;inp.classList.remove('bad');hint('muni','');}}
+
+/* ===================== GPS ===================== */
+$('btnGps').onclick=()=>{
+  if(!navigator.geolocation){toast('Este dispositivo no tiene GPS disponible');return;}
+  toast('Buscando señal GPS…');
+  navigator.geolocation.getCurrentPosition(p=>{
+    pt={lat:p.coords.latitude,lon:p.coords.longitude};coordSrc='gps';
+    if(!cur)nearest(pt);showSel();drawSvg();if(mapMode==='tile')tileCenter(pt.lat,pt.lon,16);
+    toast('Ubicación GPS tomada (±'+Math.round(p.coords.accuracy)+' m)');
+  },err=>toast(err.code===1?'Permiso de ubicación negado':'No se obtuvo señal GPS. Intente al aire libre.'),{enableHighAccuracy:true,timeout:25000,maximumAge:0});
+};
+
+/* ===================== VALIDACIÓN / GUARDAR ===================== */
+$('celular').addEventListener('input',e=>{e.target.value=fmtCel(e.target.value);});
+function hint(id,t){const h=document.querySelector(`.hint[data-for="${id}"]`);if(h)h.textContent=t;const el=$(id);if(el)el.classList.toggle('bad',!!t);}
+['nombre','celular','email','predio','area'].forEach(id=>$(id).addEventListener('input',()=>hint(id,'')));
+function validate(){
+  let ok=true;const v=id=>$(id).value.trim();
+  if(v('nombre').length<3){hint('nombre','Escriba el nombre completo');ok=false;}
+  const cel=v('celular').replace(/\D/g,'');
+  if(!/^3\d{9}$/.test(cel)&&!/^60\d{8}$/.test(cel)){hint('celular','Celular de 10 dígitos (ej. 300 123 4567)');ok=false;}
+  if(v('email')&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))){hint('email','Revise el correo');ok=false;}
+  if(!v('predio')){hint('predio','Escriba el nombre del predio o finca');ok=false;}
+  const a=parseFloat(v('area'));if(!(a>0)){hint('area','Indique el área aproximada');ok=false;}
+  if(!cur){hint('muni','Seleccione el municipio de la lista');ok=false;}
+  if(!ok){const b=document.querySelector('.bad');if(b)b.scrollIntoView({behavior:'smooth',block:'center'});}
+  return ok;
+}
+let editId=null;
+$('btnSave').onclick=()=>{
+  if(!validate()){toast('Faltan datos por completar');return;}
+  const v=id=>$(id).value.trim();
+  const prev=editId?mem.recs.find(r=>r.id===editId):null;
+  const r={id:editId||uid(),ts:prev?(prev.ts||Date.now()):Date.now(),fecha:prev?prev.fecha:new Date().toLocaleString('es-CO'),
+    nombre:v('nombre'),celular:v('celular').replace(/\D/g,''),email:v('email').toLowerCase(),predio:v('predio'),
+    area:parseFloat(v('area')),unidad:$('unidad').value,departamento:cur.d,municipio:cur.m,vereda:v('vereda'),
+    lat:+pt.lat.toFixed(6),lon:+pt.lon.toFixed(6),origen:coordSrc,obs:v('obs'),sync:false};
+  if(prev)Object.assign(prev,r);else mem.recs.unshift(r);
+  if(persist()){toast(editId?'Registro actualizado ✓':'Registro guardado ✓');resetForm();counts();autoSync();}
+};
+$('btnCancel').onclick=resetForm;
+function resetForm(){
+  $('f').reset();cur=null;pt=null;coordSrc='municipio';editId=null;
+  document.querySelectorAll('.hint').forEach(h=>h.textContent='');document.querySelectorAll('.bad').forEach(b=>b.classList.remove('bad'));
+  showSel();drawSvg();if(mapMode==='tile')setMap('svg');
+  $('ftitle').textContent='Registro de cliente potencial';$('btnSave').textContent='Guardar registro';$('btnCancel').classList.add('hide');
+  window.scrollTo(0,0);
+}
+function editRec(id){
+  const r=mem.recs.find(x=>x.id===id);if(!r)return;showTab('form');editId=id;
+  ['nombre','email','predio','vereda','obs'].forEach(k=>$(k).value=r[k]||'');
+  $('celular').value=fmtCel(r.celular);$('area').value=r.area;$('unidad').value=r.unidad;
+  const o=MUNIS.find(x=>x.m===r.municipio&&x.d===r.departamento);pt={lat:r.lat,lon:r.lon};coordSrc=r.origen;
+  if(o)pick(o,true);
+  $('ftitle').textContent='Editar registro';$('btnSave').textContent='Guardar cambios';$('btnCancel').classList.remove('hide');
+}
+
+/* ===================== LISTA ===================== */
+function counts(){const t=mem.recs.length,p=mem.recs.filter(r=>!r.sync).length;$('cnt').textContent=t;$('sTot').textContent=t;$('sPen').textContent=p;$('sSyn').textContent=t-p;}
+$('q').addEventListener('input',renderList);
+function renderList(){
+  counts();const q=norm($('q').value||'');
+  const rs=mem.recs.filter(r=>!q||norm([r.nombre,r.predio,r.municipio,r.departamento,r.celular].join(' ')).includes(q));
+  $('recs').innerHTML=rs.length?rs.map(r=>`<div class="rec ${r.sync?'sync':''}">
+    <div class="h"><div><div class="n">${esc(r.nombre)}</div>
+    <div class="m">📱 ${esc(fmtCel(r.celular))}${r.email?' · ✉ '+esc(r.email):''}<br>
+    🏡 ${esc(r.predio)} · ${esc(r.area)} ${esc(r.unidad)}<br>📍 ${esc(r.municipio)}, ${esc(r.departamento)}${r.vereda?' · '+esc(r.vereda):''}<br>
+    <span style="font-size:12px">${esc(r.fecha)}</span></div></div>
+    <span class="tag ${r.sync?'s':'p'}">${r.sync?'Enviado':'Pendiente'}</span></div>
+    <div class="a"><button class="btn ghost sm" data-ed="${r.id}">Editar</button>
+    <a class="btn ghost sm" href="https://wa.me/57${esc(r.celular)}" target="_blank" rel="noopener" style="text-decoration:none">WhatsApp</a>
+    <button class="btn danger sm" data-del="${r.id}">Eliminar</button></div></div>`).join('')
+    :`<div class="empty">${mem.recs.length?'Sin coincidencias.':'Aún no hay registros.<br>Use “Nuevo registro” para empezar.'}</div>`;
+  $('recs').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editRec(b.dataset.ed));
+  $('recs').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delRec(b.dataset.del,b));
+}
+function delRec(id,b){
+  if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='¿Seguro? Tocar de nuevo';setTimeout(()=>{b.dataset.c='';b.textContent='Eliminar';},3000);return;}
+  mem.recs=mem.recs.filter(r=>r.id!==id);persist();renderList();toast('Registro eliminado del dispositivo');
+}
+
+/* ===================== ENVÍO ===================== */
+let syncing=false;
+async function sync(manual){
+  const pend=mem.recs.filter(r=>!r.sync);
+  if(!pend.length){if(manual)toast('Todo está sincronizado ✓');return;}
+  if(!mem.url){if(manual)toast('El envío aún no está configurado');return;}
+  if(!navigator.onLine){if(manual)toast('Sin internet. Se enviará cuando haya señal.');return;}
+  if(syncing)return;syncing=true;const b=$('btnSync');b.disabled=true;b.textContent='Enviando…';
+  try{
+    const res=await fetch(mem.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({registros:pend.map(({sync,...r})=>({...r,origen:{municipio:'Centro municipio',gps:'GPS',mapa:'Marcado en mapa'}[r.origen]||r.origen}))})});
+    const j=await res.json();
+    if(!j.ok)throw new Error(j.error||'Error del script');
+    const ok=new Set(j.ids);mem.recs.forEach(r=>{if(ok.has(r.id))r.sync=true;});persist();
+    toast(`${ok.size} registro(s) enviados ✓`);
+  }catch(e){if(manual)toast('No se pudo enviar: '+(e.message||e));}
+  finally{syncing=false;b.disabled=false;b.textContent='⇪ Enviar registros';if(!$('tab-list').classList.contains('hide'))renderList();else counts();}
+}
+const autoSync=()=>sync(false);
+$('btnSync').onclick=()=>sync(true);
+
+/* ===================== AJUSTES ===================== */
+$('url').value=mem.url;
+(function secret(){let n=0,tm;document.querySelector('.top img').addEventListener('click',()=>{n++;clearTimeout(tm);tm=setTimeout(()=>n=0,1500);if(n>=5){n=0;$('url').value=mem.url;$('testOut').textContent='';showTab('cfg');}});})();
+$('btnClose').onclick=()=>showTab('form');
+$('btnSaveUrl').onclick=()=>{const u=$('url').value.trim();if(u&&!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)){$('testOut').innerHTML='<span class="er">Dirección no válida</span>';return;}mem.url=u;try{localStorage.setItem(KURL,u);}catch(e){}$('testOut').innerHTML='<span class="ok">Guardado ✓</span>';};
+$('btnTest').onclick=async()=>{
+  const u=$('url').value.trim();if(!u){$('testOut').innerHTML='<span class="er">Pegue primero la URL</span>';return;}
+  if(!navigator.onLine){$('testOut').innerHTML='<span class="er">Sin internet en este momento</span>';return;}
+  $('testOut').textContent='Probando…';
+  try{const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({ping:true})});const j=await r.json();
+    $('testOut').innerHTML=j.ok?'<span class="ok">✓ Conexión correcta</span>':'<span class="er">El script respondió con error: '+esc(j.error)+'</span>';}
+  catch(e){$('testOut').innerHTML='<span class="er">No responde. Revise la dirección.</span>';}
+};
+
+/* ===================== EXPORTAR ===================== */
+const COLS=[['id','ID'],['fecha','Fecha registro'],['nombre','Nombre completo'],['celular','Celular'],['email','E-mail'],['predio','Predio/Finca'],['area','Área aprox.'],['unidad','Unidad'],['departamento','Departamento'],['municipio','Municipio'],['vereda','Vereda/Referencia'],['lat','Latitud'],['lon','Longitud'],['origen','Origen coordenada'],['obs','Observaciones'],['sync','Enviado']];
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+const stamp=()=>new Date().toISOString().slice(0,10);
+$('btnXls').onclick=()=>{
+  if(!mem.recs.length){toast('No hay registros para exportar');return;}
+  const cell=(v,t)=>`<Cell><Data ss:Type="${t}">${esc(v)}</Data></Cell>`;
+  let x=`<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#025868" ss:Pattern="Solid"/></Style></Styles><Worksheet ss:Name="Clientes"><Table>`;
+  x+='<Row>'+COLS.map(c=>`<Cell ss:StyleID="h"><Data ss:Type="String">${c[1]}</Data></Cell>`).join('')+'</Row>';
+  mem.recs.forEach(r=>{x+='<Row>'+COLS.map(([k])=>{let v=r[k];if(k==='sync')v=v?'Sí':'No';if(k==='origen')v={municipio:'Centro municipio',gps:'GPS',mapa:'Marcado en mapa'}[v]||v;return cell(v??'',(k==='area'||k==='lat'||k==='lon')?'Number':'String');}).join('')+'</Row>';});
+  x+='</Table></Worksheet></Workbook>';
+  download(`Clientes_Precision_${stamp()}.xls`,new Blob([x],{type:'application/vnd.ms-excel'}));
+};
+$('btnJson').onclick=()=>download(`Respaldo_Precision_${stamp()}.json`,new Blob([JSON.stringify(mem.recs,null,1)],{type:'application/json'}));
+$('fileIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const a=JSON.parse(rd.result);if(!Array.isArray(a))throw 0;const ids=new Set(mem.recs.map(r=>r.id));let n=0;a.forEach(r=>{if(r&&r.id&&!ids.has(r.id)){mem.recs.push(r);n++;}});persist();renderList();toast(n+' registro(s) restaurados');}catch(_){toast('Archivo de respaldo no válido');}};rd.readAsText(f);e.target.value='';};
+
+/* ===================== INICIO ===================== */
+buildSvg();drawSvg();netUI();counts();setTimeout(autoSync,1500);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
