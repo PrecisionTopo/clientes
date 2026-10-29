@@ -24,7 +24,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-tex
 button,input,select,textarea{font:inherit;color:inherit}
 header{background:#fff;border-bottom:4px solid var(--teal);position:sticky;top:0;z-index:20}
 .top{max-width:760px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
-.top img{height:44px;width:auto}
+.top img{height:44px;width:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
 .top .sp{flex:1}
 .net{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;white-space:nowrap}
 .net.on{background:#e3f4ea;color:var(--ok)} .net.off{background:#f1f1f1;color:var(--muted)}
@@ -218,7 +218,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
   <h1>Configuración</h1>
   <p class="sub">Dirección de envío de los registros. Se guarda en este dispositivo.</p>
   <div class="card">
-    <input id="url" type="password" placeholder="Pegue aquí la dirección" autocomplete="off">
+    <input id="url" type="url" inputmode="url" placeholder="Pegue aquí la dirección" autocomplete="off">
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
       <button class="btn sec sm" id="btnSaveUrl">Guardar</button>
       <button class="btn ghost sm" id="btnTest">Probar</button>
@@ -527,8 +527,8 @@ function delRec(id,b){
 let syncing=false;
 async function sync(manual){
   const pend=mem.recs.filter(r=>!r.sync);
+  if(!mem.url){if(manual){$('url').value='';$('testOut').innerHTML='Pegue la dirección de envío y toque <b>Probar</b>.';showTab('cfg');}return;}
   if(!pend.length){if(manual)toast('Todo está sincronizado ✓');return;}
-  if(!mem.url){if(manual)toast('El envío aún no está configurado');return;}
   if(!navigator.onLine){if(manual)toast('Sin internet. Se enviará cuando haya señal.');return;}
   if(syncing)return;syncing=true;const b=$('btnSync');b.disabled=true;b.textContent='Enviando…';
   try{
@@ -553,7 +553,8 @@ $('btnTest').onclick=async()=>{
   if(!navigator.onLine){$('testOut').innerHTML='<span class="er">Sin internet en este momento</span>';return;}
   $('testOut').textContent='Probando…';
   try{const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({ping:true})});const j=await r.json();
-    $('testOut').innerHTML=j.ok?'<span class="ok">✓ Conexión correcta</span>':'<span class="er">El script respondió con error: '+esc(j.error)+'</span>';}
+    if(j.ok){mem.url=u;try{localStorage.setItem(KURL,u);}catch(e){}}
+    $('testOut').innerHTML=j.ok?'<span class="ok">✓ Conexión correcta. Dirección guardada.</span>':'<span class="er">El script respondió con error: '+esc(j.error)+'</span>';}
   catch(e){$('testOut').innerHTML='<span class="er">No responde. Revise la dirección.</span>';}
 };
 
